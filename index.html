@@ -1,0 +1,150 @@
+<!DOCTYPE html><html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Malla Interactiva - Contador UNC</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to bottom right, #d4d0ff, #f0e4ff);
+      margin: 0;
+      padding: 1rem;
+    }
+    h1 {
+      text-align: center;
+      color: #3f3d56;
+    }
+    .filtros {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    select {
+      padding: 0.4rem;
+      border-radius: 6px;
+      border: 1px solid #aaa;
+    }
+    .materia {
+      background: #e2dbff;
+      border: 2px solid #a08bce;
+      border-radius: 8px;
+      padding: 0.6rem;
+      margin: 0.5rem;
+      display: inline-block;
+      cursor: pointer;
+      user-select: none;
+      transition: 0.3s;
+    }
+    .materia:hover {
+      background: #d3c3ff;
+    }
+    .materia.tachada {
+      text-decoration: line-through;
+      background: #c1bfd6;
+      color: #555;
+      border-color: #999;
+    }
+    .oculta {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>Malla Interactiva - Contador UNC</h1>  <div class="filtros">
+    <select id="filtro-anio">
+      <option value="">Todos los años</option>
+      <option value="Ciclo de Nivelación">Ciclo de Nivelación</option>
+      <option value="1">1º Año</option>
+      <option value="2">2º Año</option>
+      <option value="3">3º Año</option>
+      <option value="4">4º Año</option>
+      <option value="5">5º Año</option>
+      <option value="Módulo">Módulos</option>
+    </select><select id="filtro-semestre">
+  <option value="">Todos los semestres</option>
+  <option value="1er semestre">1er semestre</option>
+  <option value="2do semestre">2do semestre</option>
+</select>
+
+  </div>  <div id="materias"></div>  <script>
+    const materias = [
+      { nombre: "Introducción a la matemática", anio: "Ciclo de Nivelación" },
+      { nombre: "Introducción a la contabilidad", anio: "Ciclo de Nivelación" },
+      { nombre: "Introducción a los estudios universitarios y a la economía", anio: "Ciclo de Nivelación" },
+      { nombre: "Matemática I", anio: 1, semestre: "1er semestre" },
+      { nombre: "Principios y Estructura de la economía", anio: 1, semestre: "1er semestre" },
+      { nombre: "Introducción a la administración", anio: 1, semestre: "1er semestre" },
+      { nombre: "Matemática II", anio: 1, semestre: "2do semestre" },
+      { nombre: "Microeconomia I", anio: 1, semestre: "2do semestre" },
+      { nombre: "Introducción a las ciencias sociales", anio: 1, semestre: "2do semestre" },
+      { nombre: "Contabilidad I", anio: 1, semestre: "2do semestre" },
+      { nombre: "Estadística I", anio: 2, semestre: "1er semestre" },
+      { nombre: "Macroeconomia I", anio: 2, semestre: "1er semestre" },
+      { nombre: "Derecho Constitucional y Administrativo", anio: 2, semestre: "1er semestre" },
+      { nombre: "Principios de la administración", anio: 2, semestre: "1er semestre" },
+      { nombre: "Estadística II", anio: 2, semestre: "2do semestre" },
+      { nombre: "Historia económica y social", anio: 2, semestre: "2do semestre" },
+      { nombre: "Derecho Privado I", anio: 2, semestre: "2do semestre" },
+      { nombre: "Contabilidad II", anio: 2, semestre: "2do semestre" },
+      { nombre: "Matemática financiera", anio: 3, semestre: "1er semestre" },
+      { nombre: "Finanzas Públicas", anio: 3, semestre: "1er semestre" },
+      { nombre: "Derecho Privado II", anio: 3, semestre: "1er semestre" },
+      { nombre: "Contabilidad III", anio: 3, semestre: "1er semestre" },
+      { nombre: "Método Cuantitativo para la toma de decisiones", anio: 3, semestre: "2do semestre" },
+      { nombre: "Política económica Argentina", anio: 3, semestre: "2do semestre" },
+      { nombre: "Gubernamental", anio: 3, semestre: "2do semestre" },
+      { nombre: "Tecnologías de la Información I", anio: 3, semestre: "2do semestre" },
+      { nombre: "Fiscal I", anio: 4, semestre: "1er semestre" },
+      { nombre: "Costos y Gestión I", anio: 4, semestre: "1er semestre" },
+      { nombre: "Electiva I", anio: 4, semestre: "1er semestre" },
+      { nombre: "Derecho Laboral", anio: 4, semestre: "2do semestre" },
+      { nombre: "Costos y Gestión II", anio: 4, semestre: "2do semestre" },
+      { nombre: "Auditoría", anio: 4, semestre: "2do semestre" },
+      { nombre: "Contabilidad IV", anio: 4, semestre: "2do semestre" },
+      { nombre: "Administrativa Financiera", anio: 5, semestre: "1er semestre" },
+      { nombre: "Fiscal II", anio: 5, semestre: "1er semestre" },
+      { nombre: "Sociedades", anio: 5, semestre: "1er semestre" },
+      { nombre: "Análisis de Estados Contables", anio: 5, semestre: "1er semestre" },
+      { nombre: "Fiscal III", anio: 5, semestre: "2do semestre" },
+      { nombre: "Seminario", anio: 5, semestre: "2do semestre" },
+      { nombre: "Derecho concursal y cambiario", anio: 5, semestre: "2do semestre" },
+      { nombre: "Electiva II", anio: 5, semestre: "2do semestre" },
+      { nombre: "Módulo de Portugués", anio: "Módulo" },
+      { nombre: "Módulo de Inglés", anio: "Módulo" },
+      { nombre: "Módulo de Informática", anio: "Módulo" }
+    ];
+
+    const contenedor = document.getElementById("materias");
+
+    function renderMaterias() {
+      contenedor.innerHTML = "";
+      const filtroAnio = document.getElementById("filtro-anio").value;
+      const filtroSem = document.getElementById("filtro-semestre").value;
+
+      materias.forEach(m => {
+        const div = document.createElement("div");
+        div.className = "materia";
+        div.textContent = m.nombre;
+        if (localStorage.getItem(m.nombre)) div.classList.add("tachada");
+        if ((filtroAnio && m.anio != filtroAnio) || (filtroSem && m.semestre != filtroSem)) {
+          div.classList.add("oculta");
+        }
+        div.onclick = () => {
+          div.classList.toggle("tachada");
+          if (div.classList.contains("tachada")) {
+            localStorage.setItem(m.nombre, true);
+          } else {
+            localStorage.removeItem(m.nombre);
+          }
+        };
+        contenedor.appendChild(div);
+      });
+    }
+
+    document.getElementById("filtro-anio").onchange = renderMaterias;
+    document.getElementById("filtro-semestre").onchange = renderMaterias;
+
+    renderMaterias();
+  </script></body>
+  </html>
