@@ -1,0 +1,198 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Malla Interactiva - Contador Público UNC</title>
+  <style>
+    :root {
+      --color-base: #e0e7ff;
+      --color-hover: #c7d2fe;
+      --color-aprobada: #d8b4fe;
+      --color-text: #3730a3;
+      --color-bloqueada: #a5b4fc;
+    }
+    body { font-family: sans-serif; background: #f4f4f4; margin: 0; padding: 20px; }
+    h1 { text-align: center; }
+    .materia { 
+      display: inline-block; 
+      background: var(--color-base); color: var(--color-text); 
+      margin: 5px; 
+      padding: 10px 15px; 
+      border-radius: 10px; 
+      box-shadow: 0 2px 6px rgba(99, 102, 241, 0.3); 
+      cursor: pointer; 
+      user-select: none;
+      transition: 0.2s ease;
+    }
+    .materia.aprobada {
+      text-decoration: line-through;
+      background: var(--color-aprobada);
+    }
+    .materia.bloqueada {
+      background: var(--color-bloqueada); opacity: 0.7;
+      pointer-events: none;
+    }
+    .bloque { margin: 20px 0; }
+    .bloque h2 { margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+  <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px;">
+    <select id="filtro" onchange="filtrarMaterias()">
+      <option value="todos">Mostrar todo</option>
+      <option value="ciclo">Ciclo de Nivelación</option>
+      <option value="modulo">Módulos</option>
+      <option value="1-1">1er Año - 1er Semestre</option>
+      <option value="1-2">1er Año - 2do Semestre</option>
+      <option value="2-1">2do Año - 1er Semestre</option>
+      <option value="2-2">2do Año - 2do Semestre</option>
+      <option value="3-1">3er Año - 1er Semestre</option>
+      <option value="3-2">3er Año - 2do Semestre</option>
+      <option value="4-1">4to Año - 1er Semestre</option>
+      <option value="4-2">4to Año - 2do Semestre</option>
+      <option value="5-1">5to Año - 1er Semestre</option>
+      <option value="5-2">5to Año - 2do Semestre</option>
+    </select>
+  </div>
+  <h1>Malla Interactiva - Contador Público (UNC)</h1>
+  <div id="malla"></div>
+  <script>
+    const materias = [
+    // Agregamos info de año y semestre para filtros
+
+      { nombre: "Introducción a la matemática", id: "matniv" },
+      { nombre: "Introducción a la contabilidad", id: "contniv" },
+      { nombre: "Introducción a los estudios universitarios y a la economía", id: "ecoestniv" },
+      { nombre: "Matemática I", id: "mat1", req: ["matniv"] },
+      { nombre: "Principios y Estructura de la economía", id: "eco1", req: ["matniv", "ecoestniv"] },
+      { nombre: "Introducción a la administración", id: "admint", req: ["contniv"] },
+      { nombre: "Matemática II", id: "mat2", req: ["mat1"] },
+      { nombre: "Microeconomía I", id: "micro1", req: ["eco1"] },
+      { nombre: "Introducción a las ciencias sociales", id: "soc", req: ["ecoestniv"] },
+      { nombre: "Contabilidad I", id: "cont1", req: ["contniv"] },
+      { nombre: "Estadística I", id: "est1", req: ["mat2"] },
+      { nombre: "Macroeconomía I", id: "macro1", req: ["micro1"] },
+      { nombre: "Derecho Constitucional y Administrativo", id: "der1", req: ["soc"] },
+      { nombre: "Principios de la administración", id: "adminp", req: ["admint"] },
+      { nombre: "Estadística II", id: "est2", req: ["est1"] },
+      { nombre: "Historia económica y social", id: "hist", req: ["macro1"] },
+      { nombre: "Derecho Privado I", id: "der2", req: ["der1"] },
+      { nombre: "Contabilidad II", id: "cont2", req: ["cont1"] },
+      { nombre: "Matemática financiera", id: "finmat", req: ["est1"] },
+      { nombre: "Finanzas Públicas", id: "finpub", req: ["macro1"] },
+      { nombre: "Derecho Privado II", id: "der3", req: ["der2"] },
+      { nombre: "Contabilidad III", id: "cont3", req: ["cont2"] },
+      { nombre: "Método Cuantitativo", id: "metcuant", req: ["est2"] },
+      { nombre: "Política económica argentina", id: "polarg", req: ["finpub"] },
+      { nombre: "Gubernamental", id: "guber", req: ["finpub"] },
+      { nombre: "TI I", id: "ti1", req: ["cont1", "adminp"] },
+      { nombre: "Fiscal I", id: "fisc1", req: ["finpub"] },
+      { nombre: "Costos y Gestión I", id: "cost1", req: ["cont2", "cont3"] },
+      { nombre: "Electiva I", id: "elec1" },
+      { nombre: "Derecho Laboral", id: "derlab", req: ["der3"] },
+      { nombre: "Costos y Gestión II", id: "cost2", req: ["cost1"] },
+      { nombre: "Auditoría", id: "aud", req: ["cont3"] },
+      { nombre: "Contabilidad IV", id: "cont4", req: ["cont3"] },
+      { nombre: "Administrativa Financiera", id: "adminfin", req: ["finmat"] },
+      { nombre: "Fiscal II", id: "fisc2", req: ["fisc1"] },
+      { nombre: "Sociedades", id: "socie", req: ["der3"] },
+      { nombre: "Análisis Estados Contables", id: "aec", req: ["aud"] },
+      { nombre: "Fiscal III", id: "fisc3", req: ["fisc2"] },
+      { nombre: "Seminario", id: "semi", req: ["socie", "cost2", "aec"] },
+      { nombre: "Derecho Concursal y Cambiario", id: "dercon", req: ["socie"] },
+      { nombre: "Electiva II", id: "elec2" },
+      { nombre: "Módulo Portugués", id: "port" },
+      { nombre: "Módulo Inglés", id: "ing" },
+      { nombre: "Módulo Informática", id: "info" }
+    ],
+    materias.forEach(m => {
+      // Asignar categoría por año/semestre
+      if (["matniv", "contniv", "ecoestniv"].includes(m.id)) m.cat = "ciclo";
+      else if (["port", "ing", "info"].includes(m.id)) m.cat = "modulo";
+      else if (["mat1", "eco1", "admint"].includes(m.id)) m.cat = "1-1";
+      else if (["mat2", "micro1", "soc", "cont1"].includes(m.id)) m.cat = "1-2";
+      else if (["est1", "macro1", "der1", "adminp"].includes(m.id)) m.cat = "2-1";
+      else if (["est2", "hist", "der2", "cont2"].includes(m.id)) m.cat = "2-2";
+      else if (["finmat", "finpub", "der3", "cont3"].includes(m.id)) m.cat = "3-1";
+      else if (["metcuant", "polarg", "guber", "ti1"].includes(m.id)) m.cat = "3-2";
+      else if (["fisc1", "cost1", "elec1"].includes(m.id)) m.cat = "4-1";
+      else if (["derlab", "cost2", "aud", "cont4"].includes(m.id)) m.cat = "4-2";
+      else if (["adminfin", "fisc2", "socie", "aec"].includes(m.id)) m.cat = "5-1";
+      else if (["fisc3", "semi", "dercon", "elec2"].includes(m.id)) m.cat = "5-2";
+    });
+
+    const container = document.getElementById("malla");
+
+    const aprobadas = JSON.parse(localStorage.getItem("materiasAprobadas") || "[]");
+
+    function renderMaterias() {
+      container.innerHTML = "";
+      materias.forEach(m => {
+        const el = document.createElement("div");
+        el.textContent = m.nombre;
+        el.className = "materia";
+        el.dataset.id = m.id;
+
+        const requisitos = m.req || [];
+        const cumplido = requisitos.every(r => aprobadas.includes(r));
+
+        if (!cumplido && requisitos.length > 0) {
+          el.classList.add("bloqueada");
+        }
+
+        if (aprobadas.includes(m.id)) {
+          el.classList.add("aprobada");
+        }
+
+        el.addEventListener("click", () => {
+          if (!cumplido && requisitos.length > 0) return;
+          if (aprobadas.includes(m.id)) {
+            const i = aprobadas.indexOf(m.id);
+            aprobadas.splice(i, 1);
+          } else {
+            aprobadas.push(m.id);
+          }
+          localStorage.setItem("materiasAprobadas", JSON.stringify(aprobadas));
+          
+    function filtrarMaterias() {
+      const filtro = document.getElementById("filtro").value;
+      const cards = document.querySelectorAll(".materia");
+      cards.forEach(card => {
+        const id = card.dataset.id;
+        const m = materias.find(x => x.id === id);
+        if (filtro === "todos" || m.cat === filtro) {
+          card.style.display = "inline-block";
+        } else {
+          card.style.display = "none";
+        }
+      });
+    }
+
+    renderMaterias();
+        });
+
+        container.appendChild(el);
+      });
+    }
+
+    
+    function filtrarMaterias() {
+      const filtro = document.getElementById("filtro").value;
+      const cards = document.querySelectorAll(".materia");
+      cards.forEach(card => {
+        const id = card.dataset.id;
+        const m = materias.find(x => x.id === id);
+        if (filtro === "todos" || m.cat === filtro) {
+          card.style.display = "inline-block";
+        } else {
+          card.style.display = "none";
+        }
+      });
+    }
+
+    renderMaterias();
+  </script>
+</body>
+</html>
